@@ -1,7 +1,5 @@
 var _ = require('lodash-node');
-
-
-
+var mongopool = require('./mongopool');
 
 module.exports = [
     { method: 'GET', path: '/products', handler: getAllProducts },
@@ -10,10 +8,7 @@ module.exports = [
 ];
 
 function getAllProducts (request, reply) {
-	var db = request.server.plugins['hapi-mongodb'].db;
-	var ObjectID = request.server.plugins['hapi-mongodb'].ObjectID;
-
-	db.collection('products', function(err, collection) {
+	mongopool.db.collection('products', function(err, collection) {
        collection.find().toArray(function(err, items) {
             reply(items);
         });
@@ -21,27 +16,21 @@ function getAllProducts (request, reply) {
 }
 
 function getProduct (request, reply) {
-	var db = request.server.plugins['hapi-mongodb'].db;
-	var ObjectID = request.server.plugins['hapi-mongodb'].ObjectID;
-
 	var id = request.params.id;
     console.log('Retrieving product: ' + id);
-    db.collection('products', function(err, collection) {
-        collection.findOne({'_id':new new ObjectID(request.params.id)}, function(err, item) {
+    mongopool.db.collection('products', function(err, collection) {
+        collection.findOne({'_id': new mongopool.ObjectID(id)}, function(err, item) {
             reply(item);
         });
     });
 }
 
 function addProduct (request, reply) {
-	var db = request.server.plugins['hapi-mongodb'].db;
-	var ObjectID = request.server.plugins['hapi-mongodb'].ObjectID;
-
 	var product = {
 		name: request.payload.name
 	};
 
-	db.collection('products', function(err, collection) {
+	mongopool.collection('products', function(err, collection) {
         collection.insert(product, {safe:true}, function(err, result) {
             if (err) {
                 reply({'error':'An error has occurred'});
