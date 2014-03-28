@@ -1,5 +1,8 @@
 var _ = require('lodash-node');
+var q = require('q');
 var mongopool = require('./mongopool');
+
+var productCollection = mongopool.db.collection('products');
 
 module.exports = [
     { method: 'GET', path: '/products', handler: getAllProducts },
@@ -8,21 +11,18 @@ module.exports = [
 ];
 
 function getAllProducts (request, reply) {
-	mongopool.db.collection('products', function(err, collection) {
-       collection.find().toArray(function(err, items) {
-            reply(items);
-        });
-    });
+	productCollection.find().toArray().then(function(items) {
+        reply(items);
+	});
 }
 
 function getProduct (request, reply) {
 	var id = request.params.id;
-    console.log('Retrieving product: ' + id);
-    mongopool.db.collection('products', function(err, collection) {
-        collection.findOne({'_id': new mongopool.ObjectID(id)}, function(err, item) {
-            reply(item);
-        });
-    });
+	console.log('Retrieving product: ' + id);
+
+	productCollection.findOne({'_id': mongopool.ObjectId(id)}).then(function(item) {
+        reply(item);
+	});
 }
 
 function addProduct (request, reply) {
@@ -30,14 +30,12 @@ function addProduct (request, reply) {
 		name: request.payload.name
 	};
 
-	mongopool.collection('products', function(err, collection) {
-        collection.insert(product, {safe:true}, function(err, result) {
-            if (err) {
-                reply({'error':'An error has occurred'});
-            } else {
-                console.log('Success: ' + JSON.stringify(result[0]));
-                reply(result[0]);
-            }
-        });
-    });
+	productCollection.insert(product, {safe:true}).then(function(err, result) {
+        if (err) {
+            reply({'error':'An error has occurred'});
+        } else {
+            console.log('Success: ' + JSON.stringify(result[0]));
+            reply(result[0]);
+        }
+	});
 }

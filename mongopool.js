@@ -1,15 +1,17 @@
-var mongodb = require('mongodb');
-var MongoClient = mongodb.MongoClient;
-var ObjectID = mongodb.ObjectID;
+var pmongo = require('promised-mongo');
 var db;
 
-var MONGODB_URI = 'mongodb://localhost:27017/test';
+/*module.exports.Register = function(err, db, uri, config){
+	MongoClient.connect(uri, config, function (err, database) {
+	   if(err) return next(err);
+	  	db = database;
+	  	module.exports.db = db;
+	  	module.exports.ObjectID = ObjectID;
+	  });
+};*/
 
-MongoClient.connect(MONGODB_URI, {}, function (err, database) {
-   if(err) return next(err);
-  	db = database;
-  	module.exports.db = db;
-  	module.exports.ObjectID = ObjectID;
-  });
+db = pmongo('test');
+module.exports.db = db;
+module.exports.ObjectId = pmongo.ObjectId;
 
 
