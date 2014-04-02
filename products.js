@@ -30,12 +30,14 @@ function addProduct (request, reply) {
 		name: request.payload.name
 	};
 
-	productCollection.insert(product, {safe:true}).then(function(err, result) {
-        if (err) {
-            reply({'error':'An error has occurred'});
-        } else {
-            console.log('Success: ' + JSON.stringify(result[0]));
+	console.log(product.name);
+
+	productCollection.insert(product, {safe:true}).then(function(result) {
+        if (result) {
+        	console.log('Success: ' + JSON.stringify(result[0]));
             reply(result[0]);
+        } else {
+            reply({'error':'An error has occurred'});
         }
 	});
 }
